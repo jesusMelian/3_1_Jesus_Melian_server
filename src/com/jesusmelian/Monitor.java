@@ -16,12 +16,16 @@ public class Monitor {
 
   public String putMessage(String message) {
     String rMessage = null;
-    //NOTIFICO A LOS METODOS QUE ESPERAN
+
+    //COMPRUEBO EL MESAJE QUE HA ENVIADO
     if(comprobeAndRefactorMessage(message) != null){
       listMessage[index]=(comprobeAndRefactorMessage(message));
+      rMessage=listMessage[index];
+      index++;
     }else{
       System.out.println("NO SE HA INTRODUCIDO message: ");
     }
+    //NOTIFICO A LOS METODOS QUE ESPERAN
     notifyAll();
     return rMessage;
   }
@@ -31,10 +35,13 @@ public class Monitor {
     while (listMessage.length<1) {
       wait();
     }
+    index--;
+    rMessage = listMessage[index];
     //NOTIFICO A LOS METODOS QUE ESPERAN
     notifyAll();
     return rMessage;
   }
+
 
   //Comprobara que se ha añadido message:
   public String comprobeAndRefactorMessage(String message){

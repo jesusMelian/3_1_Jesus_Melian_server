@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Main {
 
@@ -27,26 +28,45 @@ public class Main {
         private Socket socket = null;
         private ObjectInputStream ois = null;
         private ObjectOutputStream oos = null;
+        String nombreUsuario = null;
+        String [] listMsg = new String[100];
+        //Scanner sc = new Scanner(System.in);
 
         public Hilo(Socket socket) {
             this.socket = socket;
         }
 
         public void run() {
+            Monitor monitor = new Monitor();
+
+            //Comporbara si es la primera vez que se conecta
             boolean first = true;
             System.out.println("CONEXION RECIBIDA DESDE: " + socket.getInetAddress());
-            String nombreUsuario = null;
+            String msg = null;
+
             try {
                 ois = new ObjectInputStream(socket.getInputStream());
                 oos = new ObjectOutputStream(socket.getOutputStream());
+                //COMO ES LA PRIMERA VEZ DEFINO EL USUARIO, Y OBTENGO TODOS LOS MENSAJES
+
                 if (first) {
                     nombreUsuario = (String) ois.readObject();
+                    oos.writeObject(nombreUsuario);
+                    //obtengo la lista de mensajes
+                    listMsg=monitor.getAll();
+                }else{
+                    //System.out.println("INTRODUZCA EL MENSAJE: debe comenzar con'message:'");
+                    msg=(String) ois.readObject();;
+                    //Añado el mensaje al array
+                    monitor.putMessage(msg);
+                    //Obtengo el mensaje
+                    msg= monitor.getMessage();
+
+                    listMsg[listMsg.length-1]=msg;
                 }
 
-                String saludo = "Hola friki [" + nombreUsuario + "] TIME: " + System.currentTimeMillis();
-                oos.writeObject(saludo);
-                System.out.println("SALUDO ENVIADO CON EXITO A: " + socket.getInetAddress() + "Y USUARIO: " + nombreUsuario);
-            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("RECIBIDO CORRECTAMENTE DE:  " + socket.getInetAddress() + "Y USUARIO: " + nombreUsuario);
+            } catch (IOException | ClassNotFoundException | InterruptedException e) {
                 e.printStackTrace();
             } finally {
                 try {
