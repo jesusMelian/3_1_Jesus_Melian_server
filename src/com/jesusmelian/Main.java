@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 public class Main {
 
-    public String[] listMessage= new String[100];
 
     public static void main(String[] args) throws IOException {
         // write your code here
@@ -17,34 +16,36 @@ public class Main {
         Socket socket = null;
         ServerSocket ss = new ServerSocket(PORT);
 
-        while(true){
+        while (true) {
             socket = ss.accept();
             Hilo worker = new Hilo(socket);
             worker.start();
         }
     }
+
     static class Hilo extends Thread {
         private Socket socket = null;
         private ObjectInputStream ois = null;
         private ObjectOutputStream oos = null;
+
         public Hilo(Socket socket) {
-            this.socket=socket;
+            this.socket = socket;
         }
 
-        public void run(){
+        public void run() {
             boolean first = true;
-            System.out.println("CONEXION RECIBIDA DESDE: "+socket.getInetAddress());
+            System.out.println("CONEXION RECIBIDA DESDE: " + socket.getInetAddress());
             String nombreUsuario = null;
             try {
                 ois = new ObjectInputStream(socket.getInputStream());
                 oos = new ObjectOutputStream(socket.getOutputStream());
-                if(first){
+                if (first) {
                     nombreUsuario = (String) ois.readObject();
                 }
 
-                String saludo = "Hola friki ["+ nombreUsuario + "] TIME: "+ System.currentTimeMillis();
+                String saludo = "Hola friki [" + nombreUsuario + "] TIME: " + System.currentTimeMillis();
                 oos.writeObject(saludo);
-                System.out.println("SALUDO ENVIADO CON EXITO A: "+socket.getInetAddress() + "Y USUARIO: "+nombreUsuario);
+                System.out.println("SALUDO ENVIADO CON EXITO A: " + socket.getInetAddress() + "Y USUARIO: " + nombreUsuario);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             } finally {
@@ -60,25 +61,5 @@ public class Main {
 
 
         }
-    }
-
-    //LA primera vez que se conecte tendra que enviarle todos los mensajes
-    public String[] getAll() {
-        return listMessage;
-    }
-
-    public String putMessage(String message) {
-        String rMessage = null;
-        return rMessage;
-    }
-
-    public String getMessage() {
-        String rMessage = null;
-        return rMessage;
-    }
-    
-    //Comprobara que se ha añadido message:
-    public void comprobeAndRefactorMessage(String message){
-
     }
 }
