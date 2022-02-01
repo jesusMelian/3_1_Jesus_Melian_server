@@ -5,7 +5,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Main {
@@ -21,6 +24,7 @@ public class Main {
             socket = ss.accept();
             Hilo worker = new Hilo(socket);
             worker.start();
+
         }
     }
 
@@ -39,56 +43,58 @@ public class Main {
 
         public void run() {
             Monitor monitor = new Monitor(listMsg);
-
-            //Comporbara si es la primera vez que se conecta
-            boolean first = true;
+            DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+            Date date = new Date();
             System.out.println("CONEXION RECIBIDA DESDE: " + socket.getInetAddress());
-            String msg = null;
+            System.out.println("Hora actual: " + dateFormat.format(date));
 
-            while (!msg.equalsIgnoreCase("bye")) {
+
                 try {
                     ois = new ObjectInputStream(socket.getInputStream());
                     oos = new ObjectOutputStream(socket.getOutputStream());
-                    //COMO ES LA PRIMERA VEZ DEFINO EL USUARIO, Y OBTENGO TODOS LOS MENSAJES
-                    if (first) {
-                        System.out.println("ENTRO POR FIRST");
-                        //obtengo la lista de mensajes
-                        listMsg = monitor.getAll();
-                        oos.writeObject(listMsg);
-                        if (listMsg != null) {
-                            for (String msgs : listMsg) {
-                                System.out.println("LISTAS DE MSG: " + msgs);
-                            }
-                        }
 
-                        //first=false;
+                    //INTRODUZCO EL USUARIO
+                    String usuario = (String) ois.readObject();
+                    System.out.println("LEO EL USUARIO: "+ usuario);
 
-                    } else {
-
+                    oos.writeObject(monitor.getAll());
+                    String msg = "";
+                    while(!msg.equals("bye")) {
                         msg = (String) ois.readObject();
+
                         //SI ES BUY TERMINO
                         if (msg.equalsIgnoreCase("bye")) {
                             oos.writeObject("GoodBye");
-                            seguir = false;
                         } else {
                             System.out.println("MI MENSAJE: " + msg);
                             //Añado el mensaje al array
-                            monitor.putMessage(msg);
+                            monitor.putMessage(msg, usuario, dateFormat.format(date).toString());
                             //Obtengo el mensaje
-                            msg = monitor.getMessage();
+                            //msg = monitor.getMessage();
 
-                            listMsg.add(msg);
+                            //listMsg.add(msg);
+                            listMsg.add("USER: "+usuario+ " MENSAJE: "+msg);
                             oos.writeObject(msg);
+
+                            for(String msgs: listMsg){
+                                System.out.println(msgs);
+                            }
                         }
-
-
                     }
-
                     //System.out.println("RECIBIDO CORRECTAMENTE DE:  " + socket.getInetAddress() + "Y USUARIO: " + nombreUsuario);
                 } catch (IOException | ClassNotFoundException | InterruptedException e) {
                     e.printStackTrace();
+                } finally {
+                    try {
+                        if (oos != null) oos.close();
+                        if (ois != null) ois.close();
+                        if (socket != null) socket.close();
+                        System.out.println("nnñoo se acabo lo que se daba");
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
-    }
 }

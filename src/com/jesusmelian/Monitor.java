@@ -21,13 +21,16 @@ public class Monitor {
     return listMessage;
   }
 
-  public String putMessage(String message) {
+  public String putMessage(String message, String user, String time) {
     String rMessage = null;
 
     //COMPRUEBO EL MESAJE QUE HA ENVIADO
     if(comprobeAndRefactorMessage(message) != null){
-      listMessage.add((comprobeAndRefactorMessage(message)));
-      rMessage=listMessage.get(index);
+      String msg = comprobeAndRefactorMessage(message);
+      System.out.println("METO EL MENSAJE: "+"<"+user+">"+" : "+time+"<"+msg+">");
+      listMessage.add("<"+user+">"+" : "+time+" <"+msg+">");
+      rMessage="<"+user+">"+" : "+time+"<"+listMessage.get(index)+">";
+      System.out.println("rMessage: "+rMessage);
       index++;
 
     }else{
@@ -57,6 +60,7 @@ public class Monitor {
     System.out.println("INICIO DE MSG: "+message.substring(0,8));
     if(message.substring(0,8).equalsIgnoreCase("message:")){
       rMessage=message.substring(8);
+      System.out.println("ENVIO EL MENSAJE: "+rMessage);
     }
     return rMessage;
   }
