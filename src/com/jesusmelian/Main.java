@@ -50,19 +50,27 @@ public class Main {
                 //COMO ES LA PRIMERA VEZ DEFINO EL USUARIO, Y OBTENGO TODOS LOS MENSAJES
 
                 if (first) {
-                    nombreUsuario = (String) ois.readObject();
-                    oos.writeObject(nombreUsuario);
                     //obtengo la lista de mensajes
                     listMsg=monitor.getAll();
-                }else{
-                    //System.out.println("INTRODUZCA EL MENSAJE: debe comenzar con'message:'");
-                    msg=(String) ois.readObject();;
-                    //Añado el mensaje al array
-                    monitor.putMessage(msg);
-                    //Obtengo el mensaje
-                    msg= monitor.getMessage();
+                    oos.writeObject(listMsg);
 
-                    listMsg[listMsg.length-1]=msg;
+                }else{
+
+                    msg=(String) ois.readObject();
+                    //SI ES BUY TERMINO
+                    if(msg.equalsIgnoreCase("bye")){
+                        oos.writeObject("GoodBye");
+                    }else{
+                        //Añado el mensaje al array
+                        monitor.putMessage(msg);
+                        //Obtengo el mensaje
+                        msg= monitor.getMessage();
+
+                        listMsg[listMsg.length-1]=msg;
+                        oos.writeObject(msg);
+                    }
+
+
                 }
 
                 System.out.println("RECIBIDO CORRECTAMENTE DE:  " + socket.getInetAddress() + "Y USUARIO: " + nombreUsuario);
