@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 public class Main {
 
+    public String[] listMessage= new String[100];
+
     public static void main(String[] args) throws IOException {
         // write your code here
         final int PORT = 8080;
@@ -60,5 +62,23 @@ public class Main {
         }
     }
 
+    //LA primera vez que se conecte tendra que enviarle todos los mensajes
+    public String[] getAll() {
+        return listMessage;
+    }
+
+    public String putMessage(String message) {
+        String rMessage = null;
+        return rMessage;
+    }
+
+    public String getMessage() {
+        String rMessage = null;
+        return rMessage;
+    }
     
+    //Comprobara que se ha añadido message:
+    public void comprobeAndRefactorMessage(String message){
+
+    }
 }
