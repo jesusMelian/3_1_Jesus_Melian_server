@@ -1,14 +1,21 @@
 package com.jesusmelian;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class Monitor {
-  public String[] listMessage= new String[100];
+  private ArrayList<String> listMessage = null;
   private int index = 0;
 
+  public Monitor(ArrayList<String> listMessage) {
+    Collections.synchronizedList(listMessage);
+  }
+
   //LA primera vez que se conecte tendra que enviarle todos los mensajes
-  public synchronized String[] getAll() throws InterruptedException{
-    while (listMessage.length<1) {
+  public synchronized ArrayList<String> getAll() throws InterruptedException{
+    /*while (listMessage.size()<1) {
       wait();
-    }
+    }*/
     //NOTIFICO A LOS METODOS QUE ESPERAN
     notifyAll();
     return listMessage;
@@ -19,9 +26,10 @@ public class Monitor {
 
     //COMPRUEBO EL MESAJE QUE HA ENVIADO
     if(comprobeAndRefactorMessage(message) != null){
-      listMessage[index]=(comprobeAndRefactorMessage(message));
-      rMessage=listMessage[index];
+      listMessage.add((comprobeAndRefactorMessage(message)));
+      rMessage=listMessage.get(index);
       index++;
+
     }else{
       System.out.println("NO SE HA INTRODUCIDO message: ");
     }
@@ -32,11 +40,11 @@ public class Monitor {
 
   public synchronized String getMessage() throws InterruptedException{
     String rMessage = null;
-    while (listMessage.length<1) {
+    while (listMessage.size()<1) {
       wait();
     }
     index--;
-    rMessage = listMessage[index];
+    rMessage = listMessage.get(index);
     //NOTIFICO A LOS METODOS QUE ESPERAN
     notifyAll();
     return rMessage;

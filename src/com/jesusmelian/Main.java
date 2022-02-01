@@ -29,7 +29,8 @@ public class Main {
         private ObjectInputStream ois = null;
         private ObjectOutputStream oos = null;
         String nombreUsuario = null;
-        String [] listMsg = new String[100];
+        ArrayList<String> listMsg = new ArrayList<>();
+        boolean seguir = true;
         //Scanner sc = new Scanner(System.in);
 
         public Hilo(Socket socket) {
@@ -37,57 +38,57 @@ public class Main {
         }
 
         public void run() {
-            Monitor monitor = new Monitor();
+            Monitor monitor = new Monitor(listMsg);
 
             //Comporbara si es la primera vez que se conecta
             boolean first = true;
             System.out.println("CONEXION RECIBIDA DESDE: " + socket.getInetAddress());
             String msg = null;
 
-            try {
-                ois = new ObjectInputStream(socket.getInputStream());
-                oos = new ObjectOutputStream(socket.getOutputStream());
-                //COMO ES LA PRIMERA VEZ DEFINO EL USUARIO, Y OBTENGO TODOS LOS MENSAJES
+            while (!msg.equalsIgnoreCase("bye")) {
+                try {
+                    ois = new ObjectInputStream(socket.getInputStream());
+                    oos = new ObjectOutputStream(socket.getOutputStream());
+                    //COMO ES LA PRIMERA VEZ DEFINO EL USUARIO, Y OBTENGO TODOS LOS MENSAJES
+                    if (first) {
+                        System.out.println("ENTRO POR FIRST");
+                        //obtengo la lista de mensajes
+                        listMsg = monitor.getAll();
+                        oos.writeObject(listMsg);
+                        if (listMsg != null) {
+                            for (String msgs : listMsg) {
+                                System.out.println("LISTAS DE MSG: " + msgs);
+                            }
+                        }
 
-                if (first) {
-                    //obtengo la lista de mensajes
-                    listMsg=monitor.getAll();
-                    oos.writeObject(listMsg);
+                        //first=false;
 
-                }else{
+                    } else {
 
-                    msg=(String) ois.readObject();
-                    //SI ES BUY TERMINO
-                    if(msg.equalsIgnoreCase("bye")){
-                        oos.writeObject("GoodBye");
-                    }else{
-                        //Añado el mensaje al array
-                        monitor.putMessage(msg);
-                        //Obtengo el mensaje
-                        msg= monitor.getMessage();
+                        msg = (String) ois.readObject();
+                        //SI ES BUY TERMINO
+                        if (msg.equalsIgnoreCase("bye")) {
+                            oos.writeObject("GoodBye");
+                            seguir = false;
+                        } else {
+                            System.out.println("MI MENSAJE: " + msg);
+                            //Añado el mensaje al array
+                            monitor.putMessage(msg);
+                            //Obtengo el mensaje
+                            msg = monitor.getMessage();
 
-                        listMsg[listMsg.length-1]=msg;
-                        oos.writeObject(msg);
+                            listMsg.add(msg);
+                            oos.writeObject(msg);
+                        }
+
+
                     }
 
-
-                }
-
-                System.out.println("RECIBIDO CORRECTAMENTE DE:  " + socket.getInetAddress() + "Y USUARIO: " + nombreUsuario);
-            } catch (IOException | ClassNotFoundException | InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (ois != null) ois.close();
-                    if (oos != null) oos.close();
-                    if (socket != null) socket.close();
-                    System.out.println("NIÑOOOO SE ACABO LO QUE SE DABA");
-                } catch (IOException e) {
+                    //System.out.println("RECIBIDO CORRECTAMENTE DE:  " + socket.getInetAddress() + "Y USUARIO: " + nombreUsuario);
+                } catch (IOException | ClassNotFoundException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-
-
         }
     }
 }
