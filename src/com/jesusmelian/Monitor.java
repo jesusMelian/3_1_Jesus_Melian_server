@@ -28,7 +28,8 @@ public class Monitor {
     if(comprobeAndRefactorMessage(message) != null){
       String msg = comprobeAndRefactorMessage(message);
       System.out.println("METO EL MENSAJE: "+"<"+user+">"+" : "+time+"<"+msg+">");
-      listMessage.add("<"+user+">"+" : "+time+" <"+msg+">");
+      String msgSave = "<"+user+">"+" : "+time+" <"+msg+">";
+      listMessage.add(msgSave);
       rMessage="<"+user+">"+" : "+time+"<"+listMessage.get(index)+">";
       System.out.println("rMessage: "+rMessage);
       index++;

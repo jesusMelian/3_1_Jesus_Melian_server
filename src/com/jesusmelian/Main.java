@@ -32,6 +32,7 @@ public class Main {
         private Socket socket = null;
         private ObjectInputStream ois = null;
         private ObjectOutputStream oos = null;
+        private int index = 0;
         String nombreUsuario = null;
         ArrayList<String> listMsg = new ArrayList<>();
         boolean seguir = true;
@@ -42,39 +43,55 @@ public class Main {
         }
 
         public void run() {
-            Monitor monitor = new Monitor(listMsg);
+            ////Monitor monitor = new Monitor(listMsg);
+            //OBTENGO LA HORA QUE COLOCARE EN EL ENVIO DEL MENSAJE
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             Date date = new Date();
             System.out.println("CONEXION RECIBIDA DESDE: " + socket.getInetAddress());
             System.out.println("Hora actual: " + dateFormat.format(date));
 
-
+                //LA PRIMERA VEZ QUE ARRANCO HAGO ESTO:
                 try {
                     ois = new ObjectInputStream(socket.getInputStream());
                     oos = new ObjectOutputStream(socket.getOutputStream());
 
                     //INTRODUZCO EL USUARIO
+                    //Leo el usuario
                     String usuario = (String) ois.readObject();
                     System.out.println("LEO EL USUARIO: "+ usuario);
 
-                    oos.writeObject(monitor.getAll());
+                    //como es la primera vez, envio el arrayList con los mensajes
+                    ////oos.writeObject(monitor.getAll());
+                    oos.writeObject(listMsg);
                     String msg = "";
+
+                    //MIENTRAS NO SE ESCRIBA BYE
                     while(!msg.equals("bye")) {
+                        //Leo el mensaje
                         msg = (String) ois.readObject();
 
-                        //SI ES BUY TERMINO
+                        //SI ES BYE TERMINO
                         if (msg.equalsIgnoreCase("bye")) {
                             oos.writeObject("GoodBye");
                         } else {
                             System.out.println("MI MENSAJE: " + msg);
                             //Añado el mensaje al array
-                            monitor.putMessage(msg, usuario, dateFormat.format(date).toString());
-                            //Obtengo el mensaje
-                            //msg = monitor.getMessage();
+                            ////monitor.putMessage(msg, usuario, dateFormat.format(date).toString());
 
-                            //listMsg.add(msg);
-                            listMsg.add("USER: "+usuario+ " MENSAJE: "+msg);
-                            oos.writeObject(msg);
+                            //Compruebo que empieza por message:
+                            String miMsg = this.testAndRefactorMessage(msg);
+                            String addArrayList = "<"+usuario+">"+" : "+dateFormat.format(date).toString()+ "<"+miMsg+">";
+                            System.out.println("PARA AÑADIR: "+addArrayList);
+
+                            //añado al arrayList el mensaje formateado
+                            listMsg.add(addArrayList);
+
+                            //Obtengo el mensaje
+                            ////msg = monitor.getMessage();
+
+                            ////oos.writeObject(msg);
+                            //Le envio al cliente el mensaje formateado
+                            oos.writeObject(addArrayList);
 
                             for(String msgs: listMsg){
                                 System.out.println(msgs);
@@ -82,7 +99,7 @@ public class Main {
                         }
                     }
                     //System.out.println("RECIBIDO CORRECTAMENTE DE:  " + socket.getInetAddress() + "Y USUARIO: " + nombreUsuario);
-                } catch (IOException | ClassNotFoundException | InterruptedException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 } finally {
                     try {
@@ -96,5 +113,37 @@ public class Main {
                     }
                 }
             }
+        public String testAndRefactorMessage(String message){
+            String rMessage = null;
+            System.out.println("INICIO DE MSG: "+message.substring(0,8));
+            if(message.substring(0,8).equalsIgnoreCase("message:")){
+                rMessage=message.substring(8);
+                System.out.println("ENVIO EL MENSAJE: "+rMessage);
+            }
+            return rMessage;
         }
+
+        /*public String putMessage(String message, String user, String time) {
+            String rMessage = null;
+
+            //COMPRUEBO EL MESAJE QUE HA ENVIADO
+            if(testAndRefactorMessage(message) != null){
+                String msg = testAndRefactorMessage(message);
+                System.out.println("METO EL MENSAJE: "+"<"+user+">"+" : "+time+"<"+msg+">");
+                String msgSave = "<"+user+">"+" : "+time+" <"+msg+">";
+                listMsg.add(msgSave);
+                rMessage="<"+user+">"+" : "+time+"<"+listMsg.get(index)+">";
+                System.out.println("rMessage: "+rMessage);
+                index++;
+
+            }else{
+                System.out.println("NO SE HA INTRODUCIDO message: ");
+            }
+            //NOTIFICO A LOS METODOS QUE ESPERAN
+            notifyAll();
+            return rMessage;
+        }*/
+    }
+
+
 }
