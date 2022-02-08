@@ -43,7 +43,7 @@ public class Main {
         }
 
         public void run() {
-            ////Monitor monitor = new Monitor(listMsg);
+            Monitor monitor = new Monitor();
             //OBTENGO LA HORA QUE COLOCARE EN EL ENVIO DEL MENSAJE
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             Date date = new Date();
@@ -61,7 +61,7 @@ public class Main {
                     System.out.println("LEO EL USUARIO: "+ usuario);
 
                     //como es la primera vez, envio el arrayList con los mensajes
-                    ////oos.writeObject(monitor.getAll());
+                    //oos.writeObject(monitor.getAll());
                     oos.writeObject(listMsg);
                     String msg = "";
 
@@ -71,13 +71,11 @@ public class Main {
                         msg = (String) ois.readObject();
 
                         //SI ES BYE TERMINO
-                        if (msg.equalsIgnoreCase("bye")) {
+                        if (msg.equals("bye")) {
                             oos.writeObject("GoodBye");
                         } else {
                             System.out.println("MI MENSAJE: " + msg);
                             //Añado el mensaje al array
-                            ////monitor.putMessage(msg, usuario, dateFormat.format(date).toString());
-
                             //Compruebo que empieza por message:
                             String miMsg = this.testAndRefactorMessage(msg);
                             String addArrayList = "<"+usuario+">"+" : "+dateFormat.format(date).toString()+ "<"+miMsg+">";
@@ -87,11 +85,11 @@ public class Main {
                             listMsg.add(addArrayList);
 
                             //Obtengo el mensaje
-                            ////msg = monitor.getMessage();
+                            //msg = monitor.getMessage();
 
-                            ////oos.writeObject(msg);
+                            oos.writeObject(miMsg);
                             //Le envio al cliente el mensaje formateado
-                            oos.writeObject(addArrayList);
+                            /*oos.writeObject(addArrayList);*/
 
                             for(String msgs: listMsg){
                                 System.out.println(msgs);
@@ -122,8 +120,8 @@ public class Main {
             }
             return rMessage;
         }
-
-        /*public String putMessage(String message, String user, String time) {
+        /*
+        public String putMessage(String message, String user, String time) {
             String rMessage = null;
 
             //COMPRUEBO EL MESAJE QUE HA ENVIADO
